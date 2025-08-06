@@ -22,6 +22,7 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([globalIgnores([
+    
     ".now/*",
     "**/*.css",
     "**/.changeset",
@@ -42,7 +43,8 @@ export default defineConfig([globalIgnores([
     "!**/plopfile.js",
     "!**/react-shim.js",
     "!**/tsup.config.ts",
-]), {
+]), 
+{
     extends: fixupConfigRules(compat.extends(
         "plugin:react/recommended",
         "plugin:prettier/recommended",
