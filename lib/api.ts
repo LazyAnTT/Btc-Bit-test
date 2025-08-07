@@ -10,3 +10,21 @@ export async function fetcher<T>(
 
   return res.json();
 }
+
+export async function fetcherWithMeta<T>(url: string) {
+  const res = await fetch(url);
+
+  if (!res.ok) throw new Error("Network error");
+  const data: T[] = await res.json();
+  const total = Number(res.headers.get("x-total-count") ?? 0);
+  const pageSize = Number(new URL(url).searchParams.get("limit"));
+  const currentPage = Number(new URL(url).searchParams.get("page"));
+
+  return {
+    data,
+    meta: {
+      page: currentPage,
+      pageCount: Math.ceil(total / pageSize),
+    },
+  };
+}
