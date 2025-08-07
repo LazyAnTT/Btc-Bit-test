@@ -10,41 +10,26 @@ import {
   NavbarMenuToggle,
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
-import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
-import { Input } from "@heroui/input";
-import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
-
 import {
-  navMenuItems,
-  externalLinks,
-} from "@/components/navigation-bar/constants";
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
+import { User, LogOut } from "lucide-react";
+
+import { useAuthStore } from "@/app/features/auth/store/auth-store";
+import { navMenuItems } from "@/components/navigation-bar/constants";
 import { ThemeSwitch } from "@/components/theme";
-import { Github, Logo, HeartFilled, Search } from "@/components/icons";
+import { Logo } from "@/components/icons";
 
 export const NavigationBar = () => {
   const pathname = usePathname();
-
-  const searchInput = (
-    <Input
-      aria-label="Search"
-      classNames={{ inputWrapper: "bg-default-100", input: "text-sm" }}
-      endContent={
-        <Kbd className="hidden lg:inline-block" keys={["command"]}>
-          K
-        </Kbd>
-      }
-      labelPlacement="outside"
-      placeholder="Search..."
-      startContent={
-        <Search className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-    />
-  );
+  const { user, signOut } = useAuthStore();
 
   return (
     <HeroUINavbar maxWidth="xl" position="sticky">
@@ -52,11 +37,10 @@ export const NavigationBar = () => {
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex items-center gap-1" href="/">
             <Logo />
-            <p className="font-bold">ACME</p>
+            <span className="font-bold">Btc Bit</span>
           </NextLink>
         </NavbarBrand>
-
-        <ul className="hidden lg:flex gap-4 ml-2">
+        <ul className="hidden lg:flex gap-4 ml-6">
           {navMenuItems.map(({ href, label }) => {
             const isActive = pathname === href;
 
@@ -64,8 +48,8 @@ export const NavigationBar = () => {
               <NavbarItem key={href}>
                 <NextLink
                   className={clsx(
-                    linkStyles({ color: isActive ? "primary" : "foreground" }),
-                    "hover:text-primary font-medium transition-colors",
+                    "hover:text-primary transition-colors font-medium",
+                    { "text-primary": isActive, "text-foreground": !isActive },
                   )}
                   href={href}
                 >
@@ -77,56 +61,58 @@ export const NavigationBar = () => {
         </ul>
       </NavbarContent>
 
-      <NavbarContent className="hidden sm:flex" justify="end">
-        <NavbarItem className="hidden sm:flex gap-2">
-          <Link isExternal aria-label="Github" href={externalLinks.github}>
-            <Github className="text-default-500" />
-          </Link>
-          <ThemeSwitch />
-        </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-        <NavbarItem className="hidden md:flex">
-          <Button
-            isExternal
-            as={Link}
-            className="text-sm font-normal text-default-600 bg-default-100"
-            href={externalLinks.sponsor}
-            startContent={<HeartFilled className="text-danger" />}
-            variant="flat"
-          >
-            Sponsor
-          </Button>
-        </NavbarItem>
+      <NavbarContent
+        className="hidden sm:flex items-center gap-4"
+        justify="end"
+      >
+        <ThemeSwitch />
+
+        {!user ? (
+          <>
+            <Button as={Link} href="/sign-in" size="sm" variant="flat">
+              Sign In
+            </Button>
+            <Button as={Link} href="/sign-up" size="sm" variant="solid">
+              Sign Up
+            </Button>
+          </>
+        ) : (
+          <Dropdown>
+            <DropdownTrigger>
+              <Button className="p-2" variant="ghost">
+                <User className="h-5 w-5" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="User menu">
+              <DropdownItem key="sign-out" onClick={signOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        )}
       </NavbarContent>
 
       <NavbarContent className="sm:hidden pl-4" justify="end">
-        <Link isExternal aria-label="Github" href={externalLinks.github}>
-          <Github className="text-default-500" />
-        </Link>
-        <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>
 
       <NavbarMenu>
-        {searchInput}
-        <div className="mx-4 mt-2 flex flex-col gap-2">
-          {navMenuItems.map((item, i) => (
-            <NavbarMenuItem key={item.href}>
-              <Link
-                color={
-                  i === 2
-                    ? "primary"
-                    : i === navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
-                }
-                href={item.href}
-                size="lg"
-              >
-                {item.label}
-              </Link>
+        <div className="flex flex-col gap-2 p-4 mt-10">
+          {navMenuItems.map(({ href, label }) => (
+            <NavbarMenuItem key={href}>
+              <NextLink className="block w-full py-2" href={href}>
+                {label}
+              </NextLink>
             </NavbarMenuItem>
           ))}
+
+          {user && (
+            <>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </>
+          )}
         </div>
       </NavbarMenu>
     </HeroUINavbar>

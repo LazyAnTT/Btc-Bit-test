@@ -1,5 +1,4 @@
 export const navMenuItems = [
-  { label: "Home", href: "/" },
   { label: "Currencies", href: "/currencies" },
   { label: "Balances", href: "/balances" },
 ];
